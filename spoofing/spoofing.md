@@ -30,5 +30,37 @@ This example demonstrates spoofind through two ways -- Stealing cookies programm
 ## For you to answer
 
 1. Briefly explain the spoofing vulnerability in **insecure.ts**.
+
+    The vulnerability lies in how the session cookie (connect.sid) is exposed and not protected:
+
+    httpOnly: false in session config:
+    allows JavaScript access to session cookies, making it easy for attackers to steal them via XSS or other means.
+
 2. Briefly explain different ways in which vulnerability can be exploited.
+    
+    1. A malicious site like mal-steal-cookie.html runs:
+
+    `document.cookie`
+    and logs the user's connect.sid value.
+
+    The attacker can now impersonate the user by attaching this stolen cookie in their requests.
+
+    2. The user visits mal-csrf.html while still logged into insecure.ts.
+
+        That malicious page sends a POST request (via form or fetch) to:
+
+        `http://localhost:8000/sensitive` without the user's knowledge.
+
+    Since the browser automatically includes the session cookie, the server believes it’s a legitimate request and performs the sensitive operation.
+
+    Even though the user never clicked anything on the original site, the attacker has tricked the server into executing privileged actions.
+
 3. Briefly explain why **secure.ts** does not have the spoofing vulnerability in **insecure.ts**.
+
+    Session Cookie Theft: httpOnly: true ensures JavaScript cannot access the session cookie, blocking theft.
+    
+    CSRF Protection	sameSite: true (default = 'Lax') ensures cross-origin POSTs are blocked.
+
+    Session Integrity: secret passed via CLI and used securely; not hardcoded.
+
+    No exposure via logging	No console.log(req.body) or other leaks of session data.

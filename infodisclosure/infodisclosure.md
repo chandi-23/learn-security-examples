@@ -31,5 +31,35 @@ This will create a database in MongoDB called __infodisclosure__. Verify its pre
 Answer the following:
 
 1. Briefly explain the potential vulnerabilities in **insecure.ts**
+
+    const user = await User.findOne({ username: username as string }).exec();
+    
+    directly uses user input (req.query.username) in a MongoDB query without validation or sanitization.
+    Information Disclosure:
+
+    If an attacker successfully injects a malicious query, the server may reveal sensitive user data (e.g., full user document).
+
+    Logging Raw Input:
+    Logging the username directly (console.log(username)) leaks sensitive data to logs.
+
 2. Briefly explain how a malicious attacker can exploit them.
+    
+    If the attacker sends message:
+
+    GET /userinfo?username[$ne]=null
+
+    Result: MongoDB returns the first user document where username is not null — no auth required!
+
+    This allows the attacker to:
+
+    Bypass authentication
+
+    Retrieve potentially sensitive user information
+
 3. Briefly explain the defensive techniques used in **secure.ts** to prevent the information disclosure vulnerability?
+    
+    Using parameterized queries
+
+    Check for type validators
+
+    Use input validators
